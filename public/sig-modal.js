@@ -103,6 +103,40 @@ class SigModal {
     ctx.stroke();
   }
 
+  _renderStampPreview() {
+    const textarea = document.getElementById('stamp-textarea');
+    const preview  = document.getElementById('stamp-preview');
+    if (!textarea || !preview) return;
+
+    const lines  = textarea.value.split('\n');
+    const size   = this._stampSize;
+    const lineH  = Math.round(size * 1.4);
+    const padV   = 8;
+
+    preview.width  = 580;
+    preview.height = Math.max(lineH + padV * 2, lines.length * lineH + padV * 2);
+
+    const ctx = preview.getContext('2d');
+    ctx.clearRect(0, 0, preview.width, preview.height);
+
+    const fontParts = [];
+    if (this._stampItalic) fontParts.push('italic');
+    if (this._stampBold)   fontParts.push('bold');
+    fontParts.push(`${size}px`);
+    fontParts.push(`"${this._stampFont}"`);
+    ctx.font      = fontParts.join(' ');
+    ctx.fillStyle = '#2c2a28';
+    ctx.textAlign = this._stampAlign;
+
+    const x = this._stampAlign === 'left' ? 8
+             : this._stampAlign === 'right' ? 572
+             : 290;
+
+    lines.forEach((line, i) => {
+      ctx.fillText(line, x, padV + size + i * lineH);
+    });
+  }
+
   _bind() {
     const el = this._el;
 
