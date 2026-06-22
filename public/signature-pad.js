@@ -9,14 +9,29 @@ class SigPad {
       penColor: '#000000',
     });
     this._canvas = canvasEl;
+    this._combinedDataUrl = null;
   }
 
   isEmpty() { return this._pad.isEmpty(); }
 
-  clear() { this._pad.clear(); }
+  clear() {
+    this._pad.clear();
+    this._combinedDataUrl = null;
+  }
+
+  storeCombinedDataUrl(dataUrl) {
+    this._combinedDataUrl = dataUrl;
+  }
 
   getPng() {
     if (this._pad.isEmpty()) return null;
+    if (this._combinedDataUrl) {
+      const [, data] = this._combinedDataUrl.split(',');
+      const bytes = atob(data);
+      const arr = new Uint8Array(bytes.length);
+      for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+      return Promise.resolve(new Blob([arr], { type: 'image/png' }));
+    }
     return new Promise(resolve => {
       this._canvas.toBlob(resolve, 'image/png');
     });

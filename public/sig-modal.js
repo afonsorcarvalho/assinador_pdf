@@ -207,6 +207,7 @@ class SigModal {
         const sigDataUrl = document.getElementById('sig-modal-canvas').toDataURL('image/png');
         this._sigPad.loadDataUrl(sigDataUrl);
         const combinedDataUrl = this._combineCanvases();
+        this._sigPad.storeCombinedDataUrl(combinedDataUrl);
         this.close();
         if (this.onConfirm) this.onConfirm(combinedDataUrl);
         return;
