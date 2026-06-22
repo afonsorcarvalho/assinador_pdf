@@ -33,6 +33,30 @@ class SigModal {
               <canvas id="thickness-preview" width="80" height="20"></canvas>
             </div>
           </div>
+          <div id="stamp-wrapper">
+            <label id="stamp-toggle-label">
+              <input type="checkbox" id="stamp-toggle" />
+              Carimbo (opcional)
+            </label>
+            <div id="stamp-section" style="display:none">
+              <div id="stamp-toolbar">
+                <select id="stamp-font">
+                  <option value="Arial">Arial</option>
+                  <option value="Georgia">Georgia</option>
+                  <option value="Courier New">Courier New</option>
+                  <option value="Times New Roman">Times New Roman</option>
+                </select>
+                <input type="number" id="stamp-size" min="8" max="24" value="12" />
+                <button type="button" id="stamp-bold" class="stamp-fmt-btn">B</button>
+                <button type="button" id="stamp-italic" class="stamp-fmt-btn">I</button>
+                <button type="button" class="stamp-fmt-btn stamp-align" data-align="left">L</button>
+                <button type="button" class="stamp-fmt-btn stamp-align active" data-align="center">C</button>
+                <button type="button" class="stamp-fmt-btn stamp-align" data-align="right">R</button>
+              </div>
+              <textarea id="stamp-textarea" rows="4" placeholder="Ex: NOME COMPLETO&#10;Título / Registo&#10;Cargo"></textarea>
+              <canvas id="stamp-preview"></canvas>
+            </div>
+          </div>
         </div>
         <div id="sig-modal-footer">
           <div id="sig-modal-left-actions">
