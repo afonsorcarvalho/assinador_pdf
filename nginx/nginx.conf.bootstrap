@@ -1,0 +1,20 @@
+# Bootstrap config: use this ONLY for first-time cert issuance.
+# Steps:
+#   1. cp nginx/nginx.conf.bootstrap nginx/nginx.conf.active
+#   2. docker compose up -d nginx
+#   3. docker compose --profile certbot run --rm certbot
+#   4. cp nginx/nginx.conf.tls nginx/nginx.conf.active
+#   5. docker compose exec nginx nginx -s reload
+server {
+    listen 80;
+    server_name yourdomain.com;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 200 'nginx bootstrap ok';
+        add_header Content-Type text/plain;
+    }
+}

@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const sigOverlay  = document.getElementById('sig-overlay');
   const resizeHand  = document.getElementById('resize-handle');
   const sigCanvas   = document.getElementById('sig-canvas');
-  const sigPreview  = document.getElementById('sig-preview');
   const prevBtn     = document.getElementById('prev-page');
   const nextBtn     = document.getElementById('next-page');
   const pageLabel   = document.getElementById('page-label');
