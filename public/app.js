@@ -57,8 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Confirmed signature in modal → show overlay on PDF
-  sigModal.onConfirm = () => {
-    const dataUrl = sigPad.getDataUrl();
+  sigModal.onConfirm = (dataUrl) => {
     if (!dataUrl) return;
     overlay.show(dataUrl);
     signBtn.disabled = false;
