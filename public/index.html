@@ -7,49 +7,42 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Assinador PDF</h1>
-
-  <div id="controls">
-    <label>PDF:</label>
-    <input type="file" id="pdf-input" accept=".pdf" />
+  <div id="toolbar">
+    <label class="file-label" for="pdf-input">
+      📄 Abrir PDF
+      <input type="file" id="pdf-input" accept=".pdf" />
+    </label>
     <span id="page-nav" style="display:none">
-      <button id="prev-page">◀</button>
+      <button id="prev-page" type="button">◀</button>
       <span id="page-label">1 / 1</span>
-      <button id="next-page">▶</button>
+      <button id="next-page" type="button">▶</button>
     </span>
-    <button id="place-sig-btn" disabled>Colocar assinatura</button>
-    <button id="sign-btn" class="primary" disabled>Assinar e descarregar</button>
+    <button id="sign-btn" class="primary" type="button" disabled>Assinar e descarregar</button>
   </div>
 
-  <div id="main-area">
-    <div id="pdf-panel">
-      <div id="pdf-wrapper">
-        <canvas id="pdf-canvas"></canvas>
-        <div id="sig-overlay">
-          <img id="sig-preview" src="" alt="assinatura" />
-          <div id="resize-handle"></div>
-        </div>
+  <div id="viewer-panel">
+    <p id="drop-hint">Clique em "Abrir PDF" para começar</p>
+    <div id="pdf-wrapper" style="display:none">
+      <canvas id="pdf-canvas"></canvas>
+      <div id="sig-overlay">
+        <img id="sig-preview" src="" alt="assinatura" />
+        <div id="resize-handle"></div>
       </div>
-    </div>
-
-    <div id="sig-panel">
-      <h2>Assinatura</h2>
-      <div id="sig-canvas-wrapper">
-        <canvas id="sig-canvas" width="260" height="130"></canvas>
-      </div>
-      <div style="display:flex;gap:0.5rem">
-        <button id="clear-sig-btn">Limpar</button>
-        <button id="save-sig-btn">Guardar</button>
-        <button id="load-sig-btn">Carregar guardada</button>
-      </div>
-      <p id="status">Carregue um PDF para começar.</p>
     </div>
   </div>
+
+  <div id="statusbar">
+    <p id="status">Abra um PDF para começar.</p>
+  </div>
+
+  <!-- hidden canvas: keeps SigPad internal state as source of truth -->
+  <canvas id="sig-canvas" width="260" height="130" style="display:none"></canvas>
 
   <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.2.0/dist/signature_pad.umd.min.js"></script>
   <script src="pdf-viewer.js" type="module"></script>
   <script src="signature-pad.js" type="module"></script>
   <script src="overlay.js" type="module"></script>
+  <script src="sig-modal.js" type="module"></script>
   <script src="app.js" type="module"></script>
 </body>
 </html>
