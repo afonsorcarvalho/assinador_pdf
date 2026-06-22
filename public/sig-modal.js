@@ -6,6 +6,12 @@ class SigModal {
     this._pad = null;
     this._el = null;
     this.onConfirm = null;
+    this._stampEnabled = false;
+    this._stampFont    = 'Arial';
+    this._stampSize    = 12;
+    this._stampBold    = false;
+    this._stampItalic  = false;
+    this._stampAlign   = 'center';
     this._build();
     this._bind();
   }
@@ -137,6 +143,26 @@ class SigModal {
     });
   }
 
+  _loadStampState() {
+    this._stampEnabled = localStorage.getItem('stamp_enabled') === 'true';
+    this._stampFont    = localStorage.getItem('stamp_font')    || 'Arial';
+    this._stampSize    = parseInt(localStorage.getItem('stamp_size') || '12', 10);
+    this._stampBold    = localStorage.getItem('stamp_bold')    === 'true';
+    this._stampItalic  = localStorage.getItem('stamp_italic')  === 'true';
+    this._stampAlign   = localStorage.getItem('stamp_align')   || 'center';
+
+    document.getElementById('stamp-toggle').checked        = this._stampEnabled;
+    document.getElementById('stamp-section').style.display = this._stampEnabled ? 'block' : 'none';
+    document.getElementById('stamp-textarea').value        = localStorage.getItem('stamp_text') || '';
+    document.getElementById('stamp-font').value            = this._stampFont;
+    document.getElementById('stamp-size').value            = String(this._stampSize);
+    document.getElementById('stamp-bold').classList.toggle('active', this._stampBold);
+    document.getElementById('stamp-italic').classList.toggle('active', this._stampItalic);
+    document.querySelectorAll('.stamp-align').forEach(b => {
+      b.classList.toggle('active', b.dataset.align === this._stampAlign);
+    });
+  }
+
   _bind() {
     const el = this._el;
 
@@ -177,17 +203,74 @@ class SigModal {
         localStorage.setItem('saved_signature', dataUrl);
         return;
       }
+
+      if (id === 'stamp-bold') {
+        this._stampBold = !this._stampBold;
+        document.getElementById('stamp-bold').classList.toggle('active', this._stampBold);
+        localStorage.setItem('stamp_bold', String(this._stampBold));
+        this._renderStampPreview();
+        return;
+      }
+
+      if (id === 'stamp-italic') {
+        this._stampItalic = !this._stampItalic;
+        document.getElementById('stamp-italic').classList.toggle('active', this._stampItalic);
+        localStorage.setItem('stamp_italic', String(this._stampItalic));
+        this._renderStampPreview();
+        return;
+      }
+
+      if (e.target.classList.contains('stamp-align')) {
+        this._stampAlign = e.target.dataset.align;
+        document.querySelectorAll('.stamp-align').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        localStorage.setItem('stamp_align', this._stampAlign);
+        this._renderStampPreview();
+        return;
+      }
     });
 
     el.addEventListener('input', (e) => {
-      if (e.target.id !== 'thickness-slider') return;
-      const t = parseFloat(e.target.value);
-      if (this._pad) {
-        this._pad.maxWidth = t;
-        this._pad.minWidth = t * 0.5;
+      if (e.target.id === 'thickness-slider') {
+        const t = parseFloat(e.target.value);
+        if (this._pad) {
+          this._pad.maxWidth = t;
+          this._pad.minWidth = t * 0.5;
+        }
+        localStorage.setItem(THICKNESS_KEY, String(t));
+        this._updatePreview(t);
+        return;
       }
-      localStorage.setItem(THICKNESS_KEY, String(t));
-      this._updatePreview(t);
+      if (e.target.id === 'stamp-textarea') {
+        localStorage.setItem('stamp_text', e.target.value);
+        this._renderStampPreview();
+        return;
+      }
+      if (e.target.id === 'stamp-size') {
+        const v = parseInt(e.target.value, 10);
+        if (v >= 8 && v <= 24) {
+          this._stampSize = v;
+          localStorage.setItem('stamp_size', String(v));
+          this._renderStampPreview();
+        }
+        return;
+      }
+    });
+
+    el.addEventListener('change', (e) => {
+      if (e.target.id === 'stamp-toggle') {
+        this._stampEnabled = e.target.checked;
+        document.getElementById('stamp-section').style.display = this._stampEnabled ? 'block' : 'none';
+        localStorage.setItem('stamp_enabled', String(this._stampEnabled));
+        if (this._stampEnabled) this._renderStampPreview();
+        return;
+      }
+      if (e.target.id === 'stamp-font') {
+        this._stampFont = e.target.value;
+        localStorage.setItem('stamp_font', this._stampFont);
+        this._renderStampPreview();
+        return;
+      }
     });
 
     document.addEventListener('keydown', (e) => {
@@ -207,6 +290,8 @@ class SigModal {
       this._updatePreview(thickness);
       document.getElementById('sig-modal-confirm').disabled = this._pad.isEmpty();
     }
+    this._loadStampState();
+    if (this._stampEnabled) this._renderStampPreview();
   }
 
   close() {
