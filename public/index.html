@@ -8,6 +8,46 @@
 </head>
 <body>
   <h1>Assinador PDF</h1>
-  <p id="status">Pronto.</p>
+
+  <div id="controls">
+    <label>PDF:</label>
+    <input type="file" id="pdf-input" accept=".pdf" />
+    <span id="page-nav" style="display:none">
+      <button id="prev-page">◀</button>
+      <span id="page-label">1 / 1</span>
+      <button id="next-page">▶</button>
+    </span>
+    <button id="place-sig-btn" disabled>Colocar assinatura</button>
+    <button id="sign-btn" class="primary" disabled>Assinar e descarregar</button>
+  </div>
+
+  <div id="main-area">
+    <div id="pdf-panel">
+      <div id="pdf-wrapper">
+        <canvas id="pdf-canvas"></canvas>
+        <div id="sig-overlay">
+          <img id="sig-preview" src="" alt="assinatura" />
+          <div id="resize-handle"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="sig-panel">
+      <h2>Assinatura</h2>
+      <div id="sig-canvas-wrapper">
+        <canvas id="sig-canvas" width="260" height="130"></canvas>
+      </div>
+      <div style="display:flex;gap:0.5rem">
+        <button id="clear-sig-btn">Limpar</button>
+        <button id="save-sig-btn">Guardar</button>
+        <button id="load-sig-btn">Carregar guardada</button>
+      </div>
+      <p id="status">Carregue um PDF para começar.</p>
+    </div>
+  </div>
+
+  <script src="pdf-viewer.js" type="module"></script>
+  <script src="signature-pad.js" type="module"></script>
+  <script src="app.js" type="module"></script>
 </body>
 </html>
