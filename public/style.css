@@ -268,3 +268,114 @@ button:disabled:hover { background: inherit; border-color: inherit; color: inher
   display: flex;
   gap: 0.5rem;
 }
+
+/* ── Stamp section ──────────────────────────────────────────── */
+#stamp-wrapper {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 2px;
+}
+
+#stamp-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+}
+
+#stamp-toggle-label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
+  accent-color: var(--btn-primary-bg);
+}
+
+#stamp-section {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#stamp-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+#stamp-font {
+  font-size: 12px;
+  padding: 2px 4px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+#stamp-size {
+  width: 48px;
+  font-size: 12px;
+  padding: 2px 4px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: center;
+}
+
+.stamp-fmt-btn {
+  min-width: 28px;
+  height: 26px;
+  padding: 0 6px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.stamp-fmt-btn:hover { background: var(--bg); }
+
+.stamp-fmt-btn.active {
+  background: var(--btn-primary-bg);
+  color: #fff;
+  border-color: var(--btn-primary-bg);
+}
+
+.stamp-fmt-btn.active:hover { background: var(--btn-primary-bg); }
+
+#stamp-bold   { font-weight: bold; }
+#stamp-italic { font-style: italic; }
+
+#stamp-textarea {
+  width: 100%;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface);
+  color: var(--text);
+  resize: vertical;
+  line-height: 1.5;
+}
+
+#stamp-textarea:focus {
+  outline: none;
+  border-color: var(--btn-primary-bg);
+}
+
+#stamp-preview {
+  display: block;
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+  width: 100%;
+  background: #fff;
+}
