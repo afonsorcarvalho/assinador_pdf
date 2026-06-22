@@ -1,27 +1,25 @@
-// Wires together PdfViewer, SigPad, SigOverlay and handles POST /sign
-// Dependencies loaded via <script> tags in index.html (window.PdfViewer, window.SigPad, window.SigOverlay)
+// Wires together PdfViewer, SigPad, SigOverlay, SigModal and handles POST /sign
+// Dependencies loaded via <script> tags in index.html (window.PdfViewer, window.SigPad, window.SigOverlay, window.SigModal)
 
 document.addEventListener('DOMContentLoaded', () => {
-  const pdfInput    = document.getElementById('pdf-input');
-  const pdfCanvas   = document.getElementById('pdf-canvas');
-  const pdfWrapper  = document.getElementById('pdf-wrapper');
-  const sigOverlay  = document.getElementById('sig-overlay');
-  const resizeHand  = document.getElementById('resize-handle');
-  const sigCanvas   = document.getElementById('sig-canvas');
-  const prevBtn     = document.getElementById('prev-page');
-  const nextBtn     = document.getElementById('next-page');
-  const pageLabel   = document.getElementById('page-label');
-  const pageNav     = document.getElementById('page-nav');
-  const placeSigBtn = document.getElementById('place-sig-btn');
-  const signBtn     = document.getElementById('sign-btn');
-  const clearBtn    = document.getElementById('clear-sig-btn');
-  const saveBtn     = document.getElementById('save-sig-btn');
-  const loadBtn     = document.getElementById('load-sig-btn');
-  const statusEl    = document.getElementById('status');
+  const pdfInput   = document.getElementById('pdf-input');
+  const pdfCanvas  = document.getElementById('pdf-canvas');
+  const pdfWrapper = document.getElementById('pdf-wrapper');
+  const sigOverlay = document.getElementById('sig-overlay');
+  const resizeHand = document.getElementById('resize-handle');
+  const sigCanvas  = document.getElementById('sig-canvas');
+  const prevBtn    = document.getElementById('prev-page');
+  const nextBtn    = document.getElementById('next-page');
+  const pageLabel  = document.getElementById('page-label');
+  const pageNav    = document.getElementById('page-nav');
+  const signBtn    = document.getElementById('sign-btn');
+  const dropHint   = document.getElementById('drop-hint');
+  const statusEl   = document.getElementById('status');
 
-  const viewer  = new window.PdfViewer(pdfCanvas);
-  const sigPad  = new window.SigPad(sigCanvas);
-  const overlay = new window.SigOverlay(pdfWrapper, sigOverlay, resizeHand);
+  const viewer   = new window.PdfViewer(pdfCanvas);
+  const sigPad   = new window.SigPad(sigCanvas);
+  const overlay  = new window.SigOverlay(pdfWrapper, sigOverlay, resizeHand);
+  const sigModal = new window.SigModal(sigPad);
 
   let currentPdfFile = null;
   let pageInfo = null;
@@ -43,13 +41,29 @@ document.addEventListener('DOMContentLoaded', () => {
     setStatus('A carregar PDF...');
     try {
       await viewer.loadFile(file);
+      dropHint.style.display = 'none';
+      pdfWrapper.style.display = 'inline-block';
       pageNav.style.display = 'flex';
-      placeSigBtn.disabled = false;
-      setStatus('PDF carregado. Desenhe a assinatura e clique "Colocar assinatura".');
+      setStatus('Clique no PDF para assinar.');
     } catch (err) {
       setStatus('Erro ao carregar PDF: ' + err.message);
     }
   });
+
+  // Click on PDF canvas → open signature modal
+  pdfCanvas.addEventListener('click', () => {
+    if (!currentPdfFile) return;
+    sigModal.open();
+  });
+
+  // Confirmed signature in modal → show overlay on PDF
+  sigModal.onConfirm = () => {
+    const dataUrl = sigPad.getDataUrl();
+    if (!dataUrl) return;
+    overlay.show(dataUrl);
+    signBtn.disabled = false;
+    setStatus('Arraste e redimensione a assinatura. Depois clique "Assinar e descarregar".');
+  };
 
   // Page navigation
   prevBtn.addEventListener('click', async () => {
@@ -57,29 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   nextBtn.addEventListener('click', async () => {
     if (viewer.currentPage < viewer.totalPages - 1) await viewer.renderPage(viewer.currentPage + 1);
-  });
-
-  // Signature controls
-  clearBtn.addEventListener('click', () => sigPad.clear());
-  saveBtn.addEventListener('click', () => {
-    sigPad.saveToStorage();
-    setStatus('Assinatura guardada.');
-  });
-  loadBtn.addEventListener('click', () => {
-    const ok = sigPad.loadFromStorage();
-    setStatus(ok ? 'Assinatura carregada.' : 'Nenhuma assinatura guardada.');
-  });
-
-  // Place signature overlay
-  placeSigBtn.addEventListener('click', () => {
-    if (sigPad.isEmpty()) {
-      setStatus('Desenhe a assinatura primeiro.');
-      return;
-    }
-    const dataUrl = sigPad.getDataUrl();
-    overlay.show(dataUrl);
-    signBtn.disabled = false;
-    setStatus('Arraste e redimensione a assinatura. Depois clique "Assinar e descarregar".');
   });
 
   // Sign and download
@@ -92,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const rect = overlay.getCanvasRect();
     const { scale, pdfHeight } = pageInfo;
 
-    // Convert canvas px coords (top-left origin) → PDF points (bottom-left origin)
+    // canvas px (top-left origin) → PDF points (bottom-left origin)
     const x = rect.left / scale;
     const y = pdfHeight - (rect.top + rect.height) / scale;
     const w = rect.width / scale;
@@ -116,7 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const err = await response.json().catch(() => ({ error: response.statusText }));
         throw new Error(err.error || response.statusText);
       }
-
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
