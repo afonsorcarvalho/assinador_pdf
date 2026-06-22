@@ -163,6 +163,34 @@ class SigModal {
     });
   }
 
+  _combineCanvases() {
+    const sigCanvas = document.getElementById('sig-modal-canvas');
+
+    const stampActive = this._stampEnabled &&
+      (document.getElementById('stamp-textarea').value.trim().length > 0);
+
+    if (!stampActive) return sigCanvas.toDataURL('image/png');
+
+    const stampPreview = document.getElementById('stamp-preview');
+    const gap  = 8;
+    const sepH = 1;
+
+    const out = document.createElement('canvas');
+    out.width  = 580;
+    out.height = sigCanvas.height + gap + sepH + gap + stampPreview.height;
+
+    const ctx = out.getContext('2d');
+    ctx.drawImage(sigCanvas, 0, 0);
+
+    // separator line
+    ctx.fillStyle = '#cccccc';
+    ctx.fillRect(0, sigCanvas.height + gap, 580, sepH);
+
+    ctx.drawImage(stampPreview, 0, sigCanvas.height + gap + sepH + gap);
+
+    return out.toDataURL('image/png');
+  }
+
   _bind() {
     const el = this._el;
 
@@ -176,10 +204,11 @@ class SigModal {
 
       if (id === 'sig-modal-confirm') {
         if (!this._pad || this._pad.isEmpty()) return;
-        const dataUrl = document.getElementById('sig-modal-canvas').toDataURL('image/png');
-        this._sigPad.loadDataUrl(dataUrl);
+        const sigDataUrl = document.getElementById('sig-modal-canvas').toDataURL('image/png');
+        this._sigPad.loadDataUrl(sigDataUrl);
+        const combinedDataUrl = this._combineCanvases();
         this.close();
-        if (this.onConfirm) this.onConfirm(dataUrl);
+        if (this.onConfirm) this.onConfirm(combinedDataUrl);
         return;
       }
 
