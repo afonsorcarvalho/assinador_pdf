@@ -48,6 +48,10 @@ class SigPad {
     img.src = dataUrl;
     return true;
   }
+
+  loadDataUrl(dataUrl) {
+    this._pad.fromDataURL(dataUrl);
+  }
 }
 
 window.SigPad = SigPad;
