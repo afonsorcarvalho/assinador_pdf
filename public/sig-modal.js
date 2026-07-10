@@ -12,6 +12,9 @@ class SigModal {
     this._stampBold    = false;
     this._stampItalic  = false;
     this._stampAlign   = 'center';
+    this._uploadedImage = false;
+    this._sourceImageData = null;
+    this._bgThreshold = parseInt(localStorage.getItem('sig_bg_threshold') || '180', 10);
     this._build();
     this._bind();
   }
@@ -37,6 +40,14 @@ class SigModal {
               <input type="range" id="thickness-slider" min="1" max="8" value="2" step="0.5" />
               <span>Grossa</span>
               <canvas id="thickness-preview" width="80" height="20"></canvas>
+            </div>
+          </div>
+          <div id="bg-threshold-wrapper" style="display:none">
+            <label for="bg-threshold-slider">Remover fundo (sensibilidade)</label>
+            <div id="bg-threshold-row">
+              <span>Menos</span>
+              <input type="range" id="bg-threshold-slider" min="0" max="255" value="180" />
+              <span>Mais</span>
             </div>
           </div>
           <div id="stamp-wrapper">
@@ -68,6 +79,8 @@ class SigModal {
           <div id="sig-modal-left-actions">
             <button id="sig-modal-clear" type="button">Limpar</button>
             <button id="sig-modal-load" type="button">Carregar guardada</button>
+            <button id="sig-modal-upload" type="button">Carregar imagem</button>
+            <input type="file" id="sig-modal-file" accept="image/png,image/jpeg" hidden />
             <button id="sig-modal-save" type="button">Guardar</button>
           </div>
           <div id="sig-modal-right-actions">
@@ -191,6 +204,49 @@ class SigModal {
     return out.toDataURL('image/png');
   }
 
+  _loadImageFile(file) {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const W = 580, H = 200;
+      const off = document.createElement('canvas');
+      off.width = W; off.height = H;
+      const octx = off.getContext('2d');
+      octx.clearRect(0, 0, W, H);
+      // contain: mantém aspecto, centraliza
+      const scale = Math.min(W / img.width, H / img.height);
+      const dw = img.width * scale, dh = img.height * scale;
+      const dx = (W - dw) / 2, dy = (H - dh) / 2;
+      octx.drawImage(img, dx, dy, dw, dh);
+      this._sourceImageData = octx.getImageData(0, 0, W, H);
+      URL.revokeObjectURL(url);
+
+      this._applyThreshold();
+      this._uploadedImage = true;
+      document.getElementById('bg-threshold-wrapper').style.display = 'block';
+      document.getElementById('bg-threshold-slider').value = this._bgThreshold;
+      document.getElementById('sig-modal-confirm').disabled = false;
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      alert('Não foi possível carregar a imagem.');
+    };
+    img.src = url;
+  }
+
+  _applyThreshold() {
+    if (!this._sourceImageData) return;
+    const W = 580, H = 200;
+    const out = window.removeBackground(
+      this._sourceImageData.data, W, H, { threshold: this._bgThreshold }
+    );
+    const canvas = document.getElementById('sig-modal-canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, W, H);
+    ctx.putImageData(new ImageData(out, W, H), 0, 0);
+  }
+
   _bind() {
     const el = this._el;
 
@@ -202,8 +258,13 @@ class SigModal {
         return;
       }
 
+      if (id === 'sig-modal-upload') {
+        document.getElementById('sig-modal-file').click();
+        return;
+      }
+
       if (id === 'sig-modal-confirm') {
-        if (!this._pad || this._pad.isEmpty()) return;
+        if (!this._pad || (this._pad.isEmpty() && !this._uploadedImage)) return;
         const sigDataUrl = document.getElementById('sig-modal-canvas').toDataURL('image/png');
         this._sigPad.loadDataUrl(sigDataUrl);
         const combinedDataUrl = this._combineCanvases();
@@ -215,6 +276,9 @@ class SigModal {
 
       if (id === 'sig-modal-clear') {
         if (this._pad) this._pad.clear();
+        this._uploadedImage = false;
+        this._sourceImageData = null;
+        document.getElementById('bg-threshold-wrapper').style.display = 'none';
         document.getElementById('sig-modal-confirm').disabled = true;
         return;
       }
@@ -261,6 +325,12 @@ class SigModal {
     });
 
     el.addEventListener('input', (e) => {
+      if (e.target.id === 'bg-threshold-slider') {
+        this._bgThreshold = parseInt(e.target.value, 10);
+        localStorage.setItem('sig_bg_threshold', String(this._bgThreshold));
+        this._applyThreshold();
+        return;
+      }
       if (e.target.id === 'thickness-slider') {
         const t = parseFloat(e.target.value);
         if (this._pad) {
@@ -288,6 +358,11 @@ class SigModal {
     });
 
     el.addEventListener('change', (e) => {
+      if (e.target.id === 'sig-modal-file') {
+        this._loadImageFile(e.target.files[0]);
+        e.target.value = '';
+        return;
+      }
       if (e.target.id === 'stamp-toggle') {
         this._stampEnabled = e.target.checked;
         document.getElementById('stamp-section').style.display = this._stampEnabled ? 'block' : 'none';
@@ -326,6 +401,10 @@ class SigModal {
 
   close() {
     this._el.style.display = 'none';
+    this._uploadedImage = false;
+    this._sourceImageData = null;
+    const w = document.getElementById('bg-threshold-wrapper');
+    if (w) w.style.display = 'none';
   }
 }
 
