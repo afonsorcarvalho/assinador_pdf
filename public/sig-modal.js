@@ -287,12 +287,15 @@ class SigModal {
         const dataUrl = localStorage.getItem('saved_signature');
         if (!dataUrl || !this._pad) return;
         this._pad.fromDataURL(dataUrl);
+        this._uploadedImage = false;
+        this._sourceImageData = null;
+        document.getElementById('bg-threshold-wrapper').style.display = 'none';
         document.getElementById('sig-modal-confirm').disabled = false;
         return;
       }
 
       if (id === 'sig-modal-save') {
-        if (!this._pad || this._pad.isEmpty()) return;
+        if (!this._pad || (this._pad.isEmpty() && !this._uploadedImage)) return;
         const dataUrl = document.getElementById('sig-modal-canvas').toDataURL('image/png');
         localStorage.setItem('saved_signature', dataUrl);
         return;
@@ -405,6 +408,9 @@ class SigModal {
     this._sourceImageData = null;
     const w = document.getElementById('bg-threshold-wrapper');
     if (w) w.style.display = 'none';
+    const canvas = document.getElementById('sig-modal-canvas');
+    const ctx = canvas && canvas.getContext('2d');
+    if (ctx) ctx.clearRect(0, 0, 580, 200);
   }
 }
 
