@@ -4,10 +4,14 @@ services:
     restart: unless-stopped
     expose:
       - "3000"
+    ports:
+      - "3000:3000"
 
   nginx:
     image: nginx:alpine
     restart: unless-stopped
+    profiles:
+      - nginx
     ports:
       - "80:80"
       - "443:443"
