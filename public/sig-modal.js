@@ -411,6 +411,7 @@ class SigModal {
     const canvas = document.getElementById('sig-modal-canvas');
     const ctx = canvas && canvas.getContext('2d');
     if (ctx) ctx.clearRect(0, 0, 580, 200);
+    if (this._pad) this._pad.clear();
   }
 }
 
