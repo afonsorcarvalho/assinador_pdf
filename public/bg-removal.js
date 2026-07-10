@@ -10,6 +10,7 @@ function removeBackground(srcRGBA, width, height, opts) {
     const r = srcRGBA[i];
     const g = srcRGBA[i + 1];
     const b = srcRGBA[i + 2];
+    const srcA = srcRGBA[i + 3];
     const lum = 0.299 * r + 0.587 * g + 0.114 * b;
 
     if (lum >= threshold) {
@@ -21,7 +22,7 @@ function removeBackground(srcRGBA, width, height, opts) {
       out[i] = ink.r;
       out[i + 1] = ink.g;
       out[i + 2] = ink.b;
-      out[i + 3] = Math.round(a * 255);
+      out[i + 3] = Math.round(a * 255 * (srcA / 255));
     }
   }
   return out;

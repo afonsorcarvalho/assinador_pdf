@@ -55,3 +55,21 @@ test('comprimento de saída = width*height*4', () => {
   const out = removeBackground(new Uint8ClampedArray(2 * 2 * 4), 2, 2, { threshold: 180 });
   expect(out.length).toBe(16);
 });
+
+test('pixel de origem totalmente transparente (letterbox) permanece transparente', () => {
+  // (0,0,0,0): escuro mas com alpha de origem 0 — não deve virar tinta opaca
+  const out = removeBackground(px(0, 0, 0, 0), 1, 1, { threshold: 180 });
+  expect(out[3]).toBe(0);
+});
+
+test('pixel escuro opaco continua opaco (sem regressão)', () => {
+  const out = removeBackground(px(0, 0, 0, 255), 1, 1, { threshold: 180 });
+  expect(out[3]).toBe(255);
+});
+
+test('pixel escuro com alpha parcial de origem escala o alpha de saída proporcionalmente', () => {
+  const out = removeBackground(px(0, 0, 0, 128), 1, 1, { threshold: 180 });
+  // sem o fator de alpha de origem seria 255; com fator ~128/255 deve ficar próximo da metade
+  expect(out[3]).toBeGreaterThan(100);
+  expect(out[3]).toBeLessThan(155);
+});
