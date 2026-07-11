@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     signBtn.disabled = true;
 
     try {
-      const response = await fetch('/sign', { method: 'POST', body: formData });
+      const response = await fetch('sign', { method: 'POST', body: formData });
       if (!response.ok) {
         const err = await response.json().catch(() => ({ error: response.statusText }));
         throw new Error(err.error || response.statusText);
