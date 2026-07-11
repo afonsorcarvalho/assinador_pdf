@@ -26,6 +26,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setStatus(msg) { statusEl.textContent = msg; }
 
+  // Footer version — single source of truth is package.json, served at /version.
+  // Falls back to the value hardcoded in index.html if the request fails.
+  fetch('/version')
+    .then((r) => r.json())
+    .then(({ version }) => {
+      const el = document.getElementById('app-version');
+      if (el && version) el.textContent = `v${version}`;
+    })
+    .catch(() => {});
+
   viewer.onPageChange = (info) => {
     pageInfo = info;
     pageLabel.textContent = `${info.currentPage + 1} / ${info.totalPages}`;
